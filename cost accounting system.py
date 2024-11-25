@@ -109,7 +109,9 @@ class Register(QMainWindow):
                 self.password_repeat.clear()
 
         if usern and mail and pasw:
-            cur.execute("""INSERT INTO Users(username, password, email, created_at) VALUES(?, ?, ?, ?)""", (username, pasw, e_mail, ''))
+            cur.execute("""INSERT INTO Users(username, password, email, created_at) VALUES(?, ?, ?, ?)""",
+                        (username, pasw, e_mail, ''))
+            con.commit()
 
     def go_back(self):
         self.parent.show()
