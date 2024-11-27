@@ -102,6 +102,19 @@ class Register(QMainWindow):
         pasw = self.password.text()
         pasw_rep = self.password_repeat.text()
 
+        def pass_check(parol):
+            up = 0
+            sym = 0
+            num = 0
+            for i in parol:
+                if i.isdigit():
+                    num += 1
+                elif i.isupper():
+                    up += 1
+                elif i.isalnum() is False:
+                    sym += 1
+            return up, sym, num
+
         if (username,) not in u_name_check:
             usern = True
         else:
@@ -112,10 +125,25 @@ class Register(QMainWindow):
         else:
             self.problems.append('Invalid e-mail')
             self.email.clear()
-        if (pasw,) not in pasw_ckeck and pasw == pasw_rep and len(pasw) >= 7:
+
+        up = pass_check(pasw)[0]
+        sym = pass_check(pasw)[1]
+        num = pass_check(pasw)[2]
+
+        if (pasw,) not in pasw_ckeck and pasw == pasw_rep and len(pasw) > 7 and up >= 0 and sym >= 0 and num >= 0:
             passw = True
         else:
             self.problems.append('Invalid password')
+            if len(pasw) < 8:
+                self.problems.append('Length < 8')
+            if pasw != pasw_rep:
+                self.problems.append("Passswords arn't matching")
+            if up < 1:
+                self.problems.append('Upper letters < 1')
+            if sym < 1:
+                self.problems.append('Symbols < 1')
+            if num < 1:
+                self.problems.append('Numbers < 1')
             self.password.clear()
             if pasw != pasw_rep:
                 self.password_repeat.clear()
