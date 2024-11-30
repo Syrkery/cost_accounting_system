@@ -1,6 +1,7 @@
 import sys, sqlite3
 from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser
+from datetime import datetime
 
 
 class LoginOrRegistration(QMainWindow):
@@ -36,34 +37,41 @@ class Login(QMainWindow):
     def cont(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        uname = False
-        mail = False
-        passw = False
-        u_name_check = cur.execute("""SELECT username FROM Users""").fetchall()
-        email_check = cur.execute("""SELECT email FROM Users""").fetchall()
-        pasw_ckeck = cur.execute("""SELECT password FROM Users""").fetchall()
+        uname = mail = passw = False
         username = self.user_name.toPlainText()
         e_mail = self.email.toPlainText()
         pasw = self.password.text()
+
+        try:
+            u_name_check = cur.execute("SELECT username FROM Users").fetchall()
+            email_check = cur.execute("SELECT email FROM Users").fetchall()
+            pasw_check = cur.execute("SELECT password FROM Users").fetchall()
+        except sqlite3.Error as e:
+            self.problems.append(f"Database error: {str(e)}")
+            return
 
         if (username,) in u_name_check:
             uname = True
         else:
             self.problems.append('Invalid username')
             self.user_name.clear()
+
         if (e_mail,) in email_check:
             mail = True
         else:
             self.problems.append('Invalid e-mail')
             self.email.clear()
-        if (pasw,) in pasw_ckeck:
+
+        if (pasw,) in pasw_check:
             passw = True
         else:
             self.problems.append('Invalid password')
             self.password.clear()
+
         if uname and mail and passw:
             self.problems.append('OK!')
             self.open_main_window()
+        con.close()
 
     def open_main_window(self):
         self.main_window = Main()
@@ -91,69 +99,52 @@ class Register(QMainWindow):
     def cont(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        usern = False
-        mail = False
-        passw = False
-        u_name_check = cur.execute("""SELECT username FROM Users""").fetchall()
-        email_check = cur.execute("""SELECT email FROM Users""").fetchall()
-        pasw_ckeck = cur.execute("""SELECT password FROM Users""").fetchall()
         username = self.user_name.toPlainText()
         e_mail = self.email.toPlainText()
         pasw = self.password.text()
         pasw_rep = self.password_repeat.text()
 
-        def pass_check(parol):
-            up = 0
-            sym = 0
-            num = 0
+        def pass_check(parol, repeat):
+            up = sym = num = 0
+            if len(parol) < 8:
+                self.problems.append('Length < 8')
+            if parol != repeat:
+                self.problems.append("Passwords aren't matching")
             for i in parol:
                 if i.isdigit():
                     num += 1
                 elif i.isupper():
                     up += 1
-                elif i.isalnum() is False:
+                elif not i.isalnum():
                     sym += 1
-            return up, sym, num
-
-        if (username,) not in u_name_check:
-            usern = True
-        else:
-            self.problems.append('Invalid username')
-            self.user_name.clear()
-        if (e_mail,) not in email_check:
-            mail = True
-        else:
-            self.problems.append('Invalid e-mail')
-            self.email.clear()
-
-        up = pass_check(pasw)[0]
-        sym = pass_check(pasw)[1]
-        num = pass_check(pasw)[2]
-
-        if (pasw,) not in pasw_ckeck and pasw == pasw_rep and len(pasw) > 7 and up >= 0 and sym >= 0 and num >= 0:
-            passw = True
-        else:
-            self.problems.append('Invalid password')
-            if len(pasw) < 8:
-                self.problems.append('Length < 8')
-            if pasw != pasw_rep:
-                self.problems.append("Passswords arn't matching")
             if up < 1:
                 self.problems.append('Upper letters < 1')
             if sym < 1:
                 self.problems.append('Symbols < 1')
             if num < 1:
                 self.problems.append('Numbers < 1')
-            self.password.clear()
-            if pasw != pasw_rep:
-                self.password_repeat.clear()
+            return all([len(parol) >= 8, parol == repeat, up >= 1, sym >= 1, num >= 1])
+
+        try:
+            u_name_check = cur.execute("SELECT username FROM Users").fetchall()
+            email_check = cur.execute("SELECT email FROM Users").fetchall()
+        except sqlite3.Error as e:
+            self.problems.append(f"Database error: {str(e)}")
+            return
+
+        usern = (username,) not in u_name_check
+        mail = (e_mail,) not in email_check
+        passw = pass_check(pasw, pasw_rep)
 
         if usern and mail and passw:
-            cur.execute("""INSERT INTO Users(username, password, email, created_at) VALUES(?, ?, ?, ?)""",
-                        (username, pasw, e_mail, ''))
+            cur.execute(
+                "INSERT INTO Users(username, password, email, created_at) VALUES(?, ?, ?, ?)",
+                (username, pasw, e_mail, datetime.now().strftime("%d-%m-%Y"))
+            )
             con.commit()
             self.problems.append('OK!')
             self.open_main_window()
+        con.close()
 
     def open_main_window(self):
         self.main_window = Main()
@@ -169,6 +160,7 @@ class Main(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('Main.ui', self)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
