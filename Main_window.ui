@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>786</width>
-    <height>514</height>
+    <width>1037</width>
+    <height>699</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>-10</x>
       <y>0</y>
-      <width>801</width>
-      <height>61</height>
+      <width>1051</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="html">
@@ -38,7 +38,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>786</width>
+     <width>1037</width>
      <height>21</height>
     </rect>
    </property>
