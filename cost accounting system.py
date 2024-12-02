@@ -44,8 +44,9 @@ class Login(QMainWindow):
 
         try:
             u_name_check = cur.execute("SELECT username FROM Users").fetchall()
-            email_check = cur.execute("SELECT email FROM Users WHERE username = ?", (u_name_check,)).fetchall()
-            pasw_check = cur.execute("SELECT email FROM Users WHERE username = ?", (u_name_check,)).fetchall()
+            uname_str = ''.join(u_name_check)
+            email_check = cur.execute("SELECT email FROM Users WHERE username = ?", (uname_str,)).fetchall()
+            pasw_check = cur.execute("SELECT email FROM Users WHERE username = ?", (uname_str,)).fetchall()
         except sqlite3.Error as e:
             self.problems.append(f"Database error: {str(e)}")
             return
