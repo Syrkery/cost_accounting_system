@@ -161,6 +161,20 @@ class Main(QMainWindow):
         super().__init__()
         uic.loadUi('Main_window.ui', self)
 
+    def Add_transaction(self):
+        pass
+
+    def Edit_transaction(self):
+        pass
+
+    def Delete(self):
+        pass
+
+    def go_back(self):
+        self.first = LoginOrRegistration()
+        self.first.show()
+        self.close()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
