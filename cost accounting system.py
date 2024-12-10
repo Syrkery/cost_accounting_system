@@ -161,6 +161,7 @@ class Main(QMainWindow):
         super().__init__()
         uic.loadUi('Main_window.ui', self)
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_window = LoginOrRegistration()
