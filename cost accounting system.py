@@ -159,8 +159,7 @@ class Register(QMainWindow):
 class Main(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('Main.ui', self)
-
+        uic.loadUi('Main_window.ui', self)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
