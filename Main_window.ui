@@ -310,7 +310,7 @@ p, li { white-space: pre-wrap; }
      <string>Edit tranaction</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="Delete">
     <property name="geometry">
      <rect>
       <x>500</x>
@@ -323,7 +323,7 @@ p, li { white-space: pre-wrap; }
      <string>Delete</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="Back">
     <property name="geometry">
      <rect>
       <x>680</x>
@@ -386,6 +386,19 @@ p, li { white-space: pre-wrap; }
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>324</x>
+      <y>592</y>
+      <width>361</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Get a report</string>
+    </property>
+   </widget>
    <zorder>line_7</zorder>
    <zorder>DESCRIPTION</zorder>
    <zorder>TYPE</zorder>
@@ -406,10 +419,11 @@ p, li { white-space: pre-wrap; }
    <zorder>filter</zorder>
    <zorder>add_transaction</zorder>
    <zorder>edit_transaction</zorder>
-   <zorder>pushButton</zorder>
-   <zorder>pushButton_2</zorder>
+   <zorder>Delete</zorder>
+   <zorder>Back</zorder>
    <zorder>DATE</zorder>
    <zorder>line</zorder>
+   <zorder>pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
