@@ -165,6 +165,7 @@ class Main(QMainWindow):
             self.edit_transaction.clicked.connect(self.Edit_transaction)
             self.Delete.clicked.connect(self.Delete)
             self.Back.clicked.connect(self.go_back)
+            self.-.clicked.connect(self.rep)
         except Exception as e:
             print(e)
 
@@ -179,6 +180,10 @@ class Main(QMainWindow):
     def Delete(self):
         self.edit_tran = Delete()
         self.edit_tran.show()
+
+    def rep(self):
+        self.rep = report()
+        self.rep.show()
 
     def go_back(self):
         self.first = LoginOrRegistration()
@@ -197,10 +202,17 @@ class Edit(QMainWindow):
         super().__init__()
         uic.loadUi('Edit_Transaction.ui', self)
 
+
 class Delete(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('Delete', self)
+
+
+class report(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('REPORTS.ui', self)
 
 
 if __name__ == '__main__':
