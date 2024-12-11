@@ -290,11 +290,14 @@ p, li { white-space: pre-wrap; }
       <height>51</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string>Add transaction</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="edit_transaction">
     <property name="geometry">
      <rect>
       <x>320</x>
@@ -402,7 +405,7 @@ p, li { white-space: pre-wrap; }
    <zorder>textBrowser_7</zorder>
    <zorder>filter</zorder>
    <zorder>add_transaction</zorder>
-   <zorder>pushButton_3</zorder>
+   <zorder>edit_transaction</zorder>
    <zorder>pushButton</zorder>
    <zorder>pushButton_2</zorder>
    <zorder>DATE</zorder>
