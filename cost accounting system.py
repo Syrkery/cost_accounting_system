@@ -158,14 +158,21 @@ class Register(QMainWindow):
 
 class Main(QMainWindow):
     def __init__(self):
-        super().__init__()
-        uic.loadUi('Main_window.ui', self)
+        try:
+            super().__init__()
+            uic.loadUi('Main_window.ui', self)
+            self.add_transaction.clicked.connect(self.Add_transaction)
+            self.edit_transaction.clicked.connect(self.Edit_transaction)
+        except Exception as e:
+            print(e)
 
     def Add_transaction(self):
-        pass
+        self.new_tran = New_transaction()
+        self.new_tran.show()
 
     def Edit_transaction(self):
-        pass
+        self.edit_tran = Edit()
+        self.edit_tran.show()
 
     def Delete(self):
         pass
@@ -174,6 +181,18 @@ class Main(QMainWindow):
         self.first = LoginOrRegistration()
         self.first.show()
         self.close()
+
+
+class New_transaction(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('New_Transaction.ui', self)
+
+
+class Edit(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('Edit_Transaction.ui', self)
 
 
 if __name__ == '__main__':
