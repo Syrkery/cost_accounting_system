@@ -59,6 +59,9 @@ p, li { white-space: pre-wrap; }
       <height>41</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
    </widget>
    <widget class="QTextBrowser" name="textBrowser_3">
     <property name="geometry">
@@ -132,6 +135,9 @@ p, li { white-space: pre-wrap; }
       <width>121</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <item>
      <property name="text">

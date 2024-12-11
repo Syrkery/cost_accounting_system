@@ -398,7 +398,7 @@ p, li { white-space: pre-wrap; }
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="GetRep">
     <property name="geometry">
      <rect>
       <x>324</x>
@@ -438,7 +438,7 @@ p, li { white-space: pre-wrap; }
    <zorder>Back</zorder>
    <zorder>DATE</zorder>
    <zorder>line</zorder>
-   <zorder>pushButton</zorder>
+   <zorder>GetRep</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
