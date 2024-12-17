@@ -1,6 +1,6 @@
 import sys, sqlite3
 from PyQt6 import uic
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox
 from datetime import datetime
 
 
@@ -158,16 +158,21 @@ class Register(QMainWindow):
 
 class Main(QMainWindow):
     def __init__(self):
-        try:
-            super().__init__()
-            uic.loadUi('Main_window.ui', self)
-            self.add_transaction.clicked.connect(self.Add_transaction)
-            self.edit_transaction.clicked.connect(self.Edit_transaction)
-            self.Delete.clicked.connect(self.Delete)
-            self.Back.clicked.connect(self.go_back)
-            self.GetRep.clicked.connect(self.rep)
-        except Exception as e:
-            print(e)
+        super().__init__()
+        uic.loadUi('Main_window.ui', self)
+        self.add_transaction.clicked.connect(self.Add_transaction)
+        self.edit_transaction.clicked.connect(self.Edit_transaction)
+        self.Delete.clicked.connect(self.Delete)
+        self.Back.clicked.connect(self.go_back)
+        self.GetRep.clicked.connect(self.rep)
+        filt = self.findChild(QComboBox, 'filter')
+        data = self.findChild(QTextBrowser, 'DATE')
+        summa = self.findChild(QTextBrowser, 'SUMM')
+        categ = self.findChild(QTextBrowser, 'CATEGORY')
+        Type = self.findChild(QTextBrowser, 'TYPE')
+        descript = self.findChild(QTextBrowser, 'DESCRIPTION')
+
+
 
     def Add_transaction(self):
         self.new_tran = New_transaction()
@@ -195,6 +200,11 @@ class New_transaction(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('New_Transaction.ui', self)
+        tran_date = self.findChild(QDateEdit, 'date_of_trans')
+        summ = self.findChild(QTextEdit, 'summ')
+        category = self.findChild(QTextEdit, 'category')
+        type = self.findChild(QComboBox, 'type')
+        description = self.findChild(QTextEdit, 'description')
 
 
 class Edit(QMainWindow):
