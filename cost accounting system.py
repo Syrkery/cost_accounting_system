@@ -171,6 +171,9 @@ class Main(QMainWindow):
         categ = self.findChild(QTextBrowser, 'CATEGORY')
         Type = self.findChild(QTextBrowser, 'TYPE')
         descript = self.findChild(QTextBrowser, 'DESCRIPTION')
+        con = sqlite3.connect('cost accounting system.sqlite')
+        cur = con.cursor()
+        db = cur.execute("""SELECT * FROM Transaction""")
 
 
 
@@ -205,6 +208,11 @@ class New_transaction(QMainWindow):
         category = self.findChild(QTextEdit, 'category')
         type = self.findChild(QComboBox, 'type')
         description = self.findChild(QTextEdit, 'description')
+        con = sqlite3.connect('cost accounting system.sqlite')
+        cur = con.cursor()
+        cur.execute(
+            """INSERT INTO Transaction(amount, date, category, type, description) VALUES(?, ?, ?, ?, ?)""",
+        (summ, tran_date, category, type, description))
 
 
 class Edit(QMainWindow):
