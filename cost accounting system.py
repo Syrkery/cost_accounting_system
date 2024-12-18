@@ -155,6 +155,8 @@ class Register(QMainWindow):
         self.close()
 
 
+from PyQt6.QtWidgets import QTableWidgetItem
+
 class Main(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -164,16 +166,22 @@ class Main(QMainWindow):
         self.Del.clicked.connect(self.Delete)
         self.Back.clicked.connect(self.go_back)
         self.GetRep.clicked.connect(self.rep)
-        filt = self.findChild(QComboBox, 'filter')
-        data = self.findChild(QTextBrowser, 'DATE')
-        summa = self.findChild(QTextBrowser, 'SUMM')
-        categ = self.findChild(QTextBrowser, 'CATEGORY')
-        Type = self.findChild(QTextBrowser, 'TYPE')
-        descript = self.findChild(QTextBrowser, 'DESCRIPTION')
+        self.load_data()
+
+    def load_data(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        db = cur.execute("""SELECT * FROM Transactions""")
+        transactions = cur.execute("SELECT date, amount, category, type, description FROM Transactions").fetchall()
+        con.close()
 
+        try:
+            self.table.setRowCount(0)
+            for row_index, row_data in enumerate(transactions):
+                self.table.insertRow(row_index)
+                for col_index, col_data in enumerate(row_data):
+                    self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
+        except Exception as e:
+            print(e)
 
     def Add_transaction(self):
         self.new_tran = New_transaction()
@@ -195,6 +203,7 @@ class Main(QMainWindow):
         self.first = LoginOrRegistration()
         self.first.show()
         self.close()
+
 
 
 class New_transaction(QMainWindow):
