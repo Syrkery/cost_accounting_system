@@ -49,7 +49,6 @@ class Login(QMainWindow):
         except sqlite3.Error as e:
             self.problems.append(f"Database error: {str(e)}")
             return
-
         if (username,) in u_name_check:
             uname = True
         else:
@@ -162,7 +161,7 @@ class Main(QMainWindow):
         uic.loadUi('Main_window.ui', self)
         self.add_transaction.clicked.connect(self.Add_transaction)
         self.edit_transaction.clicked.connect(self.Edit_transaction)
-        self.Delete.clicked.connect(self.Delete)
+        self.Del.clicked.connect(self.Delete)
         self.Back.clicked.connect(self.go_back)
         self.GetRep.clicked.connect(self.rep)
         filt = self.findChild(QComboBox, 'filter')
@@ -173,8 +172,7 @@ class Main(QMainWindow):
         descript = self.findChild(QTextBrowser, 'DESCRIPTION')
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        db = cur.execute("""SELECT * FROM Transaction""")
-
+        db = cur.execute("""SELECT * FROM Transactions""")
 
 
     def Add_transaction(self):

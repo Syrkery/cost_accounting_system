@@ -316,7 +316,7 @@ p, li { white-space: pre-wrap; }
      <string>Edit tranaction</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Delete">
+   <widget class="QPushButton" name="Del">
     <property name="geometry">
      <rect>
       <x>500</x>
@@ -434,7 +434,7 @@ p, li { white-space: pre-wrap; }
    <zorder>filter</zorder>
    <zorder>add_transaction</zorder>
    <zorder>edit_transaction</zorder>
-   <zorder>Delete</zorder>
+   <zorder>Del</zorder>
    <zorder>Back</zorder>
    <zorder>DATE</zorder>
    <zorder>line</zorder>
