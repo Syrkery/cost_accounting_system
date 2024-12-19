@@ -106,7 +106,7 @@ class Register(QMainWindow):
         def pass_check(parol, repeat):
             up = sym = num = 0
             if len(parol) < 8:
-                self.problems.append('Length < 8')
+                self.problems.append('Length should ba at least 8 symbols')
             if parol != repeat:
                 self.problems.append("Passwords aren't matching")
             for i in parol:
@@ -117,11 +117,11 @@ class Register(QMainWindow):
                 elif not i.isalnum():
                     sym += 1
             if up < 1:
-                self.problems.append('Upper letters < 1')
+                self.problems.append('There should be at least 1 upper character')
             if sym < 1:
-                self.problems.append('Symbols < 1')
+                self.problems.append('There should be at least 1 special symbol')
             if num < 1:
-                self.problems.append('Numbers < 1')
+                self.problems.append('There should be at least 1 number')
             return all([len(parol) >= 8, parol == repeat, up >= 1, sym >= 1, num >= 1])
 
         try:
