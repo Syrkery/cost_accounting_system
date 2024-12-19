@@ -1,6 +1,7 @@
 import sys, sqlite3
 from PyQt6 import uic
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox, \
+    QTableWidgetItem
 from datetime import datetime
 
 
@@ -155,8 +156,6 @@ class Register(QMainWindow):
         self.close()
 
 
-from PyQt6.QtWidgets import QTableWidgetItem
-
 class Main(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -183,8 +182,20 @@ class Main(QMainWindow):
         except Exception as e:
             print(e)
 
+    def update_transactions(self):
+        con = sqlite3.connect('cost accounting system.sqlite')
+        cur = con.cursor()
+        transactions = cur.execute("SELECT date, amount, category, type, description FROM Transactions").fetchall()
+        con.close()
+
+        self.table.setRowCount(0)
+        for row_index, row_data in enumerate(transactions):
+            self.table.insertRow(row_index)
+            for col_index, col_data in enumerate(row_data):
+                self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
+
     def Add_transaction(self):
-        self.new_tran = New_transaction()
+        self.new_tran = New_transaction(self)
         self.new_tran.show()
 
     def Edit_transaction(self):
@@ -207,19 +218,44 @@ class Main(QMainWindow):
 
 
 class New_transaction(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        uic.loadUi('New_Transaction.ui', self)
-        tran_date = self.findChild(QDateEdit, 'date_of_trans')
-        summ = self.findChild(QTextEdit, 'summ')
-        category = self.findChild(QTextEdit, 'category')
-        type = self.findChild(QComboBox, 'type')
-        description = self.findChild(QTextEdit, 'description')
+    def __init__(self, parent):
+        try:
+            super().__init__()
+            self.parent = parent
+            uic.loadUi('New_Transaction.ui', self)
+            self.tran = self.findChild(QDateEdit, 'date_of_trans')
+            self.sum = self.findChild(QTextEdit, 'summ')
+            self.categ = self.findChild(QTextEdit, 'category')
+            self.ty = self.findChild(QComboBox, 'type')
+            self.desc = self.findChild(QTextEdit, 'description')
+            self.Close.clicked.connect(self.close)
+            self.confirm.clicked.connect(self.cont)
+        except Exception as e:
+            print(e)
+
+    def close(self):
+        self.parent.update_transactions()
+        self.close()
+
+    def cont(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
+        summ = self.sum.toPlainText()
+        tran_date = self.tran.date().toString('dd-MM-yyyy')
+        category = self.categ.toPlainText()
+        if self.ty.currentText() == 'Income':
+            type = 'доход'
+        else:
+            type = 'расход'
+        description = self.desc.toPlainText()
+
         cur.execute(
-            """INSERT INTO Transaction(amount, date, category, type, description) VALUES(?, ?, ?, ?, ?)""",
-        (summ, tran_date, category, type, description))
+            """INSERT INTO Transactions(amount, date, category, type, description) VALUES(?, ?, ?, ?, ?)""",
+            (summ, tran_date, category, type, description)
+        )
+        con.commit()
+        super().close()
+        self.parent.update_transactions()
 
 
 class Edit(QMainWindow):
