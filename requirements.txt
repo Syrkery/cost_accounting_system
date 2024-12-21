@@ -1,1 +1,4 @@
-PyQt6==6.5.2
+PyQt6==6.5.1
+PyQt6-Charts==6.5.1
+sqlite3
+datetime
