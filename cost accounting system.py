@@ -1,14 +1,16 @@
 import sys, sqlite3
 from PyQt6 import uic
+from PyQt6.QtGui import QPainter
+from PyQt6.QtCharts import QPieSeries
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox, \
-    QTableWidgetItem
+    QTableWidgetItem, QGraphicsView
 from datetime import datetime
 
 
 class LoginOrRegistration(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('Login or registraation.ui', self)
+        uic.loadUi('Login or registration.ui', self)
         self.LOGIN.clicked.connect(self.open_login_window)
         self.REGISTRATION.clicked.connect(self.open_register_window)
 
@@ -274,6 +276,17 @@ class Report(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('REPORTS.ui', self)
+        self.graph = self.findChild(QGraphicsView, 'graph')
+        self.load_graph()
+
+    def load_graph(self):
+        con = sqlite3.connect('cost accounting system.sqlite')
+        cur = con.cursor()
+        data = cur.execute("SELECT category, SUM(amount) FROM Transactions GROUP BY category").fetchall()
+        con.close()
+
+        series = QPieSeries()
+
 
 
 if __name__ == '__main__':
