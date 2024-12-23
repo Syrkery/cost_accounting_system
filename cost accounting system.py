@@ -1,16 +1,15 @@
 import sys, sqlite3
 from PyQt6 import uic
-from PyQt6.QtGui import QPainter
-from PyQt6.QtCharts import QPieSeries
+import PyQt6.QtGraphs as pg
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox, \
-    QTableWidgetItem, QGraphicsView
+    QTableWidgetItem, QGraphicsView, QVBoxLayout
 from datetime import datetime
 
 
 class LoginOrRegistration(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('Login or registration.ui', self)
+        uic.loadUi('Login or registraation.ui', self)
         self.LOGIN.clicked.connect(self.open_login_window)
         self.REGISTRATION.clicked.connect(self.open_register_window)
 
@@ -285,7 +284,32 @@ class Report(QMainWindow):
         data = cur.execute("SELECT category, SUM(amount) FROM Transactions GROUP BY category").fetchall()
         con.close()
 
-        series = QPieSeries()
+        categories = [item[0] for item in data]
+        amounts = [float(item[1]) for item in data]
+
+        plot_widget = pg.PlotWidget()
+        plot_widget.setBackground('w')
+        plot_widget.addLegend()
+        bar_graph = pg.BarGraphItem(x=list(range(len(categories))), height=amounts, width=0.6, brush='b')
+        plot_widget.addItem(bar_graph)
+
+        plot_widget.getAxis('bottom').setTicks([[(i, cat) for i, cat in enumerate(categories)]])
+        plot_widget.setTitle("Transactions by Category", color="b", size="12pt")
+        plot_widget.setLabel("left", "Amount")
+        plot_widget.setLabel("bottom", "Category")
+
+        layout = self.graph.layout()
+        if layout is not None:
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget():
+                    child.widget().deleteLater()
+        else:
+            layout = QVBoxLayout(self.graph)
+            self.graph.setLayout(layout)
+
+        layout.addWidget(plot_widget)
+
 
 
 
