@@ -1,9 +1,12 @@
 import sys, sqlite3
 from PyQt6 import uic
-import PyQt6.QtGraphs as pg
+from PyQt6.QtGui import QPen, QColor, QFont
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox, \
-    QTableWidgetItem, QGraphicsView, QVBoxLayout
+    QTableWidgetItem, QGraphicsScene, QGraphicsView, QGraphicsTextItem
 from datetime import datetime
+from PyQt6.QtGui import QPen
+from PyQt6.QtCore import Qt
 
 
 class LoginOrRegistration(QMainWindow):
@@ -273,44 +276,75 @@ class Delete(QMainWindow):
 
 class Report(QMainWindow):
     def __init__(self):
-        super().__init__()
-        uic.loadUi('REPORTS.ui', self)
-        self.graph = self.findChild(QGraphicsView, 'graph')
-        self.load_graph()
+        try:
+            super().__init__()
+            uic.loadUi('REPORTS.ui', self)
+            self.graph = self.findChild(QGraphicsView, 'graph')
+            self.init_graph()
+        except Exception as e:
+            print(e)
 
-    def load_graph(self):
+    def init_graph(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        data = cur.execute("SELECT category, SUM(amount) FROM Transactions GROUP BY category").fetchall()
+        transactions = cur.execute("SELECT amount, date, type FROM Transactions").fetchall()
         con.close()
 
-        categories = [item[0] for item in data]
-        amounts = [float(item[1]) for item in data]
+        dates = []
+        amounts = []
+        types = []
 
-        plot_widget = pg.PlotWidget()
-        plot_widget.setBackground('w')
-        plot_widget.addLegend()
-        bar_graph = pg.BarGraphItem(x=list(range(len(categories))), height=amounts, width=0.6, brush='b')
-        plot_widget.addItem(bar_graph)
+        for transaction in transactions:
+            amount, date, type_ = transaction
+            dates.append(datetime.strptime(date, '%d-%m-%Y'))
+            amounts.append(float(amount))
+            types.append(type_)
 
-        plot_widget.getAxis('bottom').setTicks([[(i, cat) for i, cat in enumerate(categories)]])
-        plot_widget.setTitle("Transactions by Category", color="b", size="12pt")
-        plot_widget.setLabel("left", "Amount")
-        plot_widget.setLabel("bottom", "Category")
+        if not dates or not amounts:
+            return
 
-        layout = self.graph.layout()
-        if layout is not None:
-            while layout.count():
-                child = layout.takeAt(0)
-                if child.widget():
-                    child.widget().deleteLater()
-        else:
-            layout = QVBoxLayout(self.graph)
-            self.graph.setLayout(layout)
+        min_date = min(dates)
+        max_date = max(dates)
+        min_amount = min(amounts)
+        max_amount = max(amounts)
 
-        layout.addWidget(plot_widget)
+        date_range = (max_date - min_date).days or 1
+        amount_range = max_amount - min_amount or 1
 
+        normalized_dates = [(date - min_date).days / date_range * 800 for date in dates]
+        normalized_amounts = [(amount - min_amount) / amount_range * 400 for amount in amounts]
 
+        scene = QGraphicsScene()
+        pen = QPen(Qt.GlobalColor.blue)
+        pen.setWidth(2)
+
+        self.add_axes(scene, min_amount, max_amount)
+
+        for i in range(1, len(normalized_dates)):
+            scene.addLine(
+                normalized_dates[i - 1], 400 - normalized_amounts[i - 1],
+                normalized_dates[i], 400 - normalized_amounts[i],
+                pen
+            )
+
+        for x, y, type_ in zip(normalized_dates, normalized_amounts, types):
+            pen.setColor(QColor('red') if type_ == "expense" else QColor('green'))
+            scene.addEllipse(x - 3, 400 - y - 3, 6, 6, pen)
+
+        self.graph.setScene(scene)
+
+    def add_axes(self, scene, min_amount, max_amount):
+        pen = QPen(Qt.GlobalColor.black)
+        scene.addLine(0, 400, 800, 400, pen)
+        scene.addText("Date", QFont('Arial', 10)).setPos(800, 380)
+
+        scene.addLine(0, 0, 0, 400, pen)
+        scene.addText("Amount", QFont('Arial', 10)).setPos(10, 10)
+
+        for i in range(0, 5):
+            y_pos = i * 80
+            scene.addText(str(round(min_amount + (max_amount - min_amount) * (i / 4), 2)),
+                          QFont('Arial', 8)).setPos(-30, 400 - y_pos)
 
 
 if __name__ == '__main__':
