@@ -52,7 +52,7 @@ class Login(QMainWindow):
             email_check = cur.execute("SELECT email FROM Users WHERE username = ?", (username,)).fetchall()
             pasw_check = cur.execute("SELECT password FROM Users WHERE username = ?", (username,)).fetchall()
         except sqlite3.Error as e:
-            self.problems.append(f"Database error: {str(e)}")
+            self.problems.append(f'Database error: {str(e)}')
             return
         if (username,) in u_name_check:
             uname = True
@@ -133,7 +133,7 @@ class Register(QMainWindow):
             u_name_check = cur.execute("SELECT username FROM Users").fetchall()
             email_check = cur.execute("SELECT email FROM Users").fetchall()
         except sqlite3.Error as e:
-            self.problems.append(f"Database error: {str(e)}")
+            self.problems.append(f'Database error: {str(e)}')
             return
 
         usern = (username,) not in u_name_check
@@ -143,7 +143,7 @@ class Register(QMainWindow):
         if usern and mail and passw:
             cur.execute(
                 "INSERT INTO Users(username, password, email, created_at) VALUES(?, ?, ?, ?)",
-                (username, pasw, e_mail, datetime.now().strftime("%d-%m-%Y"))
+                (username, pasw, e_mail, datetime.now().strftime('%d-%m-%Y'))
             )
             con.commit()
             self.problems.append('OK!')
@@ -254,7 +254,7 @@ class New_transaction(QMainWindow):
         description = self.desc.toPlainText()
 
         cur.execute(
-            """INSERT INTO Transactions(amount, date, category, type, description) VALUES(?, ?, ?, ?, ?)""",
+            "INSERT INTO Transactions(amount, date, category, type, description) VALUES(?, ?, ?, ?, ?)",
             (summ, tran_date, category, type, description)
         )
         con.commit()
@@ -287,18 +287,16 @@ class Report(QMainWindow):
     def init_graph(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        transactions = cur.execute("SELECT amount, date, type FROM Transactions").fetchall()
+        transactions = cur.execute("SELECT amount, date FROM Transactions").fetchall()
         con.close()
 
         dates = []
         amounts = []
-        types = []
 
         for transaction in transactions:
-            amount, date, type_ = transaction
+            amount, date = transaction
             dates.append(datetime.strptime(date, '%d-%m-%Y'))
             amounts.append(float(amount))
-            types.append(type_)
 
         if not dates or not amounts:
             return
@@ -309,42 +307,34 @@ class Report(QMainWindow):
         max_amount = max(amounts)
 
         date_range = (max_date - min_date).days or 1
-        amount_range = max_amount - min_amount or 1
+        amount_range = max(abs(max_amount), abs(min_amount)) * 2 or 1
 
         normalized_dates = [(date - min_date).days / date_range * 800 for date in dates]
-        normalized_amounts = [(amount - min_amount) / amount_range * 400 for amount in amounts]
+        normalized_amounts = [(amount / amount_range) * 200 for amount in amounts]
 
         scene = QGraphicsScene()
         pen = QPen(Qt.GlobalColor.blue)
         pen.setWidth(2)
 
-        self.add_axes(scene, min_amount, max_amount)
+        self.add_axes(scene)
 
-        for i in range(1, len(normalized_dates)):
-            scene.addLine(
-                normalized_dates[i - 1], 400 - normalized_amounts[i - 1],
-                normalized_dates[i], 400 - normalized_amounts[i],
-                pen
-            )
+        y_center = 200
 
-        for x, y, type_ in zip(normalized_dates, normalized_amounts, types):
-            pen.setColor(QColor('red') if type_ == "expense" else QColor('green'))
-            scene.addEllipse(x - 3, 400 - y - 3, 6, 6, pen)
+        points = [(x, y_center - y) for x, y in zip(normalized_dates, normalized_amounts)]
+        for i in range(1, len(points)):
+            scene.addLine(points[i - 1][0], points[i - 1][1], points[i][0], points[i][1], pen)
+
+        for x, y in points:
+            scene.addEllipse(x - 3, y - 3, 6, 6, pen)
 
         self.graph.setScene(scene)
 
-    def add_axes(self, scene, min_amount, max_amount):
+    def add_axes(self, scene):
         pen = QPen(Qt.GlobalColor.black)
-        scene.addLine(0, 400, 800, 400, pen)
-        scene.addText("Date", QFont('Arial', 10)).setPos(800, 380)
-
-        scene.addLine(0, 0, 0, 400, pen)
-        scene.addText("Amount", QFont('Arial', 10)).setPos(10, 10)
-
-        for i in range(0, 5):
-            y_pos = i * 80
-            scene.addText(str(round(min_amount + (max_amount - min_amount) * (i / 4), 2)),
-                          QFont('Arial', 8)).setPos(-30, 400 - y_pos)
+        scene.addLine(0, 200, 800, 200, pen)
+        scene.addText('Date', QFont('Arial', 10)).setPos(750, 210)
+        scene.addLine(400, 0, 400, 400, pen)
+        scene.addText('Amount', QFont('Arial', 10)).setPos(410, 10)
 
 
 if __name__ == '__main__':
