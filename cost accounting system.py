@@ -1,9 +1,8 @@
 import sys, sqlite3
 from PyQt6 import uic
-from PyQt6.QtGui import QPen, QColor, QFont
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QFont
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox, \
-    QTableWidgetItem, QGraphicsScene, QGraphicsView, QGraphicsTextItem
+    QTableWidgetItem, QGraphicsScene, QGraphicsView
 from datetime import datetime, timedelta
 from PyQt6.QtGui import QPen
 from PyQt6.QtCore import Qt
