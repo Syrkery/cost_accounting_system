@@ -174,22 +174,7 @@ class Main(QMainWindow):
     def load_data(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        transactions = cur.execute("SELECT date, amount, category, type, description FROM Transactions").fetchall()
-        con.close()
-
-        try:
-            self.table.setRowCount(0)
-            for row_index, row_data in enumerate(transactions):
-                self.table.insertRow(row_index)
-                for col_index, col_data in enumerate(row_data):
-                    self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
-        except Exception as e:
-            print(e)
-
-    def update_transactions(self):
-        con = sqlite3.connect('cost accounting system.sqlite')
-        cur = con.cursor()
-        transactions = cur.execute("SELECT date, amount, category, type, description FROM Transactions").fetchall()
+        transactions = cur.execute("SELECT id, date, amount, category, type, description FROM Transactions").fetchall()
         con.close()
 
         self.table.setRowCount(0)
@@ -197,6 +182,9 @@ class Main(QMainWindow):
             self.table.insertRow(row_index)
             for col_index, col_data in enumerate(row_data):
                 self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
+
+    def update_transactions(self):
+        self.load_data()
 
     def Add_transaction(self):
         self.new_tran = New_transaction(self)
@@ -207,8 +195,8 @@ class Main(QMainWindow):
         self.edit_tran.show()
 
     def Delete(self):
-        self.edit_tran = Delete()
-        self.edit_tran.show()
+        self.del_tran = Delete(self)
+        self.del_tran.show()
 
     def rep(self):
         self.rep = Report()
@@ -269,9 +257,30 @@ class Edit(QMainWindow):
 
 
 class Delete(QMainWindow):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
+        self.parent = parent
         uic.loadUi('Delete.ui', self)
+        self.confirm.clicked.connect(self.delete_transaction)
+        self.cancel.clicked.connect(self.close)
+
+    def delete_transaction(self):
+        selected_row = self.parent.table.currentRow()
+        if selected_row == -1:
+            return
+
+        transaction_id = self.parent.table.item(selected_row, 0).text()
+        con = sqlite3.connect('cost accounting system.sqlite')
+        cur = con.cursor()
+        try:
+            cur.execute("DELETE FROM Transactions WHERE id = ?", (transaction_id,))
+            con.commit()
+        except sqlite3.Error as e:
+            print(f"Error while deleting: {e}")
+        finally:
+            con.close()
+            self.parent.update_transactions()
+            self.close()
 
 
 class Report(QMainWindow):
