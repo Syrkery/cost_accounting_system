@@ -4,7 +4,7 @@ from PyQt6.QtGui import QPen, QColor, QFont
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QLineEdit, QTextBrowser, QDateEdit, QComboBox, \
     QTableWidgetItem, QGraphicsScene, QGraphicsView, QGraphicsTextItem
-from datetime import datetime
+from datetime import datetime, timedelta
 from PyQt6.QtGui import QPen
 from PyQt6.QtCore import Qt
 
@@ -52,7 +52,7 @@ class Login(QMainWindow):
             email_check = cur.execute("SELECT email FROM Users WHERE username = ?", (username,)).fetchall()
             pasw_check = cur.execute("SELECT password FROM Users WHERE username = ?", (username,)).fetchall()
         except sqlite3.Error as e:
-            self.problems.append(f'Database error: {str(e)}')
+            self.problems.append(f"Database error: {str(e)}")
             return
         if (username,) in u_name_check:
             uname = True
@@ -133,7 +133,7 @@ class Register(QMainWindow):
             u_name_check = cur.execute("SELECT username FROM Users").fetchall()
             email_check = cur.execute("SELECT email FROM Users").fetchall()
         except sqlite3.Error as e:
-            self.problems.append(f'Database error: {str(e)}')
+            self.problems.append(f"Database error: {str(e)}")
             return
 
         usern = (username,) not in u_name_check
@@ -143,7 +143,7 @@ class Register(QMainWindow):
         if usern and mail and passw:
             cur.execute(
                 "INSERT INTO Users(username, password, email, created_at) VALUES(?, ?, ?, ?)",
-                (username, pasw, e_mail, datetime.now().strftime('%d-%m-%Y'))
+                (username, pasw, e_mail, datetime.now().strftime("%d-%m-%Y"))
             )
             con.commit()
             self.problems.append('OK!')
@@ -254,7 +254,7 @@ class New_transaction(QMainWindow):
         description = self.desc.toPlainText()
 
         cur.execute(
-            "INSERT INTO Transactions(amount, date, category, type, description) VALUES(?, ?, ?, ?, ?)",
+            """INSERT INTO Transactions(amount, date, category, type, description) VALUES(?, ?, ?, ?, ?)""",
             (summ, tran_date, category, type, description)
         )
         con.commit()
@@ -276,68 +276,81 @@ class Delete(QMainWindow):
 
 class Report(QMainWindow):
     def __init__(self):
-        super().__init__()
-        uic.loadUi('REPORTS.ui', self)
-        self.graph = self.findChild(QGraphicsView, 'graph')
-        self.init_graph()
+        try:
+            super().__init__()
+            uic.loadUi('REPORTS.ui', self)
+            self.graph = self.findChild(QGraphicsView, 'graph')
+            self.init_graph()
+        except Exception as e:
+            print(e)
 
     def init_graph(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        transactions = cur.execute("SELECT amount, type, date FROM Transactions").fetchall()
+        transactions = cur.execute("SELECT amount, date, type FROM Transactions").fetchall()
         con.close()
 
-        if not transactions:
-            return
-
-        balances = []
         dates = []
+        amounts = []
+        types = []
 
-        total_balance = 0
         for transaction in transactions:
-            amount, trans_type, date = transaction
-            if trans_type.lower() == 'income':
-                total_balance += amount
-            elif trans_type.lower() == 'expense':
-                total_balance -= amount
-            else:
-                continue
-
-            balances.append(total_balance)
+            amount, date, type_ = transaction
             dates.append(datetime.strptime(date, '%d-%m-%Y'))
+            amounts.append(float(amount))
+            types.append(type_)
 
-        if not balances or not dates:
+        if not dates or not amounts:
             return
 
         min_date = min(dates)
         max_date = max(dates)
-        min_balance = min(balances)
-        max_balance = max(balances)
+        min_amount = min(amounts)
+        max_amount = max(amounts)
 
         date_range = (max_date - min_date).days or 1
-        balance_range = max_balance - min_balance or 1
+        amount_range = max_amount - min_amount or 1
 
         normalized_dates = [(date - min_date).days / date_range * 800 for date in dates]
-        normalized_balances = [(balance - min_balance) / balance_range * 400 for balance in balances]
+        normalized_amounts = [(amount - min_amount) / amount_range * 400 for amount in amounts]
 
         scene = QGraphicsScene()
         pen = QPen(Qt.GlobalColor.blue)
         pen.setWidth(2)
 
-        x_axis_y = 400 - ((0 - min_balance) / balance_range * 400)
-        scene.addLine(0, x_axis_y, 800, x_axis_y, QPen(Qt.GlobalColor.black))
+        self.add_axes(scene, min_date, max_date, min_amount, max_amount)
 
         for i in range(1, len(normalized_dates)):
             scene.addLine(
-                normalized_dates[i - 1], 400 - normalized_balances[i - 1],
-                normalized_dates[i], 400 - normalized_balances[i],
+                normalized_dates[i - 1], 400 - normalized_amounts[i - 1],
+                normalized_dates[i], 400 - normalized_amounts[i],
                 pen
             )
 
-        for x, y in zip(normalized_dates, normalized_balances):
+        for x, y, type_ in zip(normalized_dates, normalized_amounts, types):
+            pen.setColor(QColor('red') if type_ == "expense" else QColor('green'))
             scene.addEllipse(x - 3, 400 - y - 3, 6, 6, pen)
 
         self.graph.setScene(scene)
+
+    def add_axes(self, scene, min_date, max_date, min_amount, max_amount):
+        pen = QPen(Qt.GlobalColor.black)
+        scene.addLine(0, 400, 800, 400, pen)
+        scene.addText("Date", QFont('Arial', 10)).setPos(800, 380)
+
+        scene.addLine(0, 0, 0, 400, pen)
+        scene.addText("Amount", QFont('Arial', 10)).setPos(10, 10)
+
+        for i in range(0, 5):
+            y_pos = i * 80
+            scene.addText(str(round(min_amount + (max_amount - min_amount) * (i / 4), 2)),
+                            QFont('Arial', 8)).setPos(-50, 400 - y_pos)
+
+        for i in range(0, 6):
+            x_pos = i * 160
+            current_date = min_date + timedelta(days=(max_date - min_date).days * i // 5)
+            scene.addText(current_date.strftime('%d-%m-%Y'), QFont('Arial', 8)).setPos(x_pos, 410)
+
 
 
 if __name__ == '__main__':
