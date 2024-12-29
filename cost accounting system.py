@@ -183,6 +183,8 @@ class Main(QMainWindow):
             for col_index, col_data in enumerate(row_data):
                 self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
 
+        self.table.setSortingEnabled(True)
+
     def update_transactions(self):
         self.load_data()
 
