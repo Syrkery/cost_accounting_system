@@ -362,7 +362,6 @@ class Report(QMainWindow):
             scene.addText(current_date.strftime('%d-%m-%Y'), QFont('Arial', 8)).setPos(x_pos, 410)
 
 
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_window = LoginOrRegistration()
