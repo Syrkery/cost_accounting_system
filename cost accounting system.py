@@ -276,65 +276,68 @@ class Delete(QMainWindow):
 
 class Report(QMainWindow):
     def __init__(self):
-        try:
-            super().__init__()
-            uic.loadUi('REPORTS.ui', self)
-            self.graph = self.findChild(QGraphicsView, 'graph')
-            self.init_graph()
-        except Exception as e:
-            print(e)
+        super().__init__()
+        uic.loadUi('REPORTS.ui', self)
+        self.graph = self.findChild(QGraphicsView, 'graph')
+        self.init_graph()
 
     def init_graph(self):
         con = sqlite3.connect('cost accounting system.sqlite')
         cur = con.cursor()
-        transactions = cur.execute("SELECT amount, date FROM Transactions").fetchall()
+        transactions = cur.execute("SELECT amount, type, date FROM Transactions").fetchall()
         con.close()
 
+        if not transactions:
+            return
+
+        balances = []
         dates = []
-        amounts = []
 
+        total_balance = 0
         for transaction in transactions:
-            amount, date = transaction
-            dates.append(datetime.strptime(date, '%d-%m-%Y'))
-            amounts.append(float(amount))
+            amount, trans_type, date = transaction
+            if trans_type.lower() == 'income':
+                total_balance += amount
+            elif trans_type.lower() == 'expense':
+                total_balance -= amount
+            else:
+                continue
 
-        if not dates or not amounts:
+            balances.append(total_balance)
+            dates.append(datetime.strptime(date, '%d-%m-%Y'))
+
+        if not balances or not dates:
             return
 
         min_date = min(dates)
         max_date = max(dates)
-        min_amount = min(amounts)
-        max_amount = max(amounts)
+        min_balance = min(balances)
+        max_balance = max(balances)
 
         date_range = (max_date - min_date).days or 1
-        amount_range = max(abs(max_amount), abs(min_amount)) * 2 or 1
+        balance_range = max_balance - min_balance or 1
 
         normalized_dates = [(date - min_date).days / date_range * 800 for date in dates]
-        normalized_amounts = [(amount / amount_range) * 200 for amount in amounts]
+        normalized_balances = [(balance - min_balance) / balance_range * 400 for balance in balances]
 
         scene = QGraphicsScene()
         pen = QPen(Qt.GlobalColor.blue)
         pen.setWidth(2)
 
-        self.add_axes(scene)
+        x_axis_y = 400 - ((0 - min_balance) / balance_range * 400)
+        scene.addLine(0, x_axis_y, 800, x_axis_y, QPen(Qt.GlobalColor.black))
 
-        y_center = 200
+        for i in range(1, len(normalized_dates)):
+            scene.addLine(
+                normalized_dates[i - 1], 400 - normalized_balances[i - 1],
+                normalized_dates[i], 400 - normalized_balances[i],
+                pen
+            )
 
-        points = [(x, y_center - y) for x, y in zip(normalized_dates, normalized_amounts)]
-        for i in range(1, len(points)):
-            scene.addLine(points[i - 1][0], points[i - 1][1], points[i][0], points[i][1], pen)
-
-        for x, y in points:
-            scene.addEllipse(x - 3, y - 3, 6, 6, pen)
+        for x, y in zip(normalized_dates, normalized_balances):
+            scene.addEllipse(x - 3, 400 - y - 3, 6, 6, pen)
 
         self.graph.setScene(scene)
-
-    def add_axes(self, scene):
-        pen = QPen(Qt.GlobalColor.black)
-        scene.addLine(0, 200, 800, 200, pen)
-        scene.addText('Date', QFont('Arial', 10)).setPos(750, 210)
-        scene.addLine(400, 0, 400, 400, pen)
-        scene.addText('Amount', QFont('Arial', 10)).setPos(410, 10)
 
 
 if __name__ == '__main__':
