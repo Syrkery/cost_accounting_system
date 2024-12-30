@@ -1,3 +1,6 @@
 PyQt6==6.8.0
-uic==0.0.1
 PyQt6-Graphs==6.8.0
+PyQt6-Graphs-Qt6==6.8.1
+PyQt6-Qt6==6.8.1
+PyQt6_sip==13.9.1
+uic==0.0.1
